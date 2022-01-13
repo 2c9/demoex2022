@@ -1,3 +1,25 @@
+data "vsphere_virtual_machine" "debian_template" {
+  name          = "debian11-template"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_virtual_machine" "winsrv_template" {
+  name          = "winsrv2019-template"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_virtual_machine" "win10_template" {
+  name          = "win10-template"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_virtual_machine" "csr1000v_template" {
+  name          = "csr1000v-template"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+###################################################
+
 resource "vsphere_virtual_machine" "isp" {
 
     depends_on = [
