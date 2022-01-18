@@ -1,32 +1,3 @@
-resource "vsphere_resource_pool" "tf_pool" {
-  count                   = var.idx
-  name                    = format("${var.prefix}DEMO2022-C%s", count.index)
-  parent_resource_pool_id = "${data.vsphere_resource_pool.pool.id}"
-}
-
-resource "vsphere_folder" "folder" {
-  count         = var.idx
-  path          = format("${var.prefix}DEMO2022-C%s", count.index)
-  type          = "vm"
-  datacenter_id = "${data.vsphere_datacenter.dc.id}"
-}
-
-######
-
-resource "vsphere_entity_permissions" "perms" {
-  count       = var.idx
-  entity_id   = vsphere_resource_pool.tf_pool[count.index].id
-  entity_type = "ResourcePool"
-  permissions {
-    user_or_group = "${var.domain}\\${element(local.students, count.index)}"
-    propagate = true
-    is_group = false
-    role_id = data.vsphere_role.role.id
-  }
-}
-
-###################################################
-
 resource "null_resource" "wait" {
   triggers = {
     isp_cli  = length(nsxt_policy_segment.tf_isp_cli),
