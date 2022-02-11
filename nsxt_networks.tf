@@ -11,8 +11,7 @@ data "nsxt_policy_segment_security_profile" "ssec_profile" {
 }
 
 resource "nsxt_policy_segment" "tf_isp_cli" {
-    count               = var.idx
-    display_name        = format("TF_ISP_CLI_%s", count.index)
+    display_name        = format("${var.prefix}ISP_CLI_${var.index}")
     transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
     security_profile {
         security_profile_path      = data.nsxt_policy_segment_security_profile.ssec_profile.path
@@ -23,8 +22,7 @@ resource "nsxt_policy_segment" "tf_isp_cli" {
 }
 
 resource "nsxt_policy_segment" "tf_isp_rtrl" {
-    count               = var.idx
-    display_name        = format("TF_ISP_RTR-L_%s", count.index)
+    display_name        = format("${var.prefix}ISP_RTR-L_${var.index}")
     transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
     security_profile {
         security_profile_path      = data.nsxt_policy_segment_security_profile.ssec_profile.path
@@ -35,8 +33,7 @@ resource "nsxt_policy_segment" "tf_isp_rtrl" {
 }
 
 resource "nsxt_policy_segment" "tf_isp_rtrr" {
-    count               = var.idx
-    display_name        = format("TF_ISP_RTR-R_%s", count.index)
+    display_name        = format("${var.prefix}ISP_RTR-R_${var.index}")
     transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
     security_profile {
         security_profile_path      = data.nsxt_policy_segment_security_profile.ssec_profile.path
@@ -47,8 +44,7 @@ resource "nsxt_policy_segment" "tf_isp_rtrr" {
 }
 
 resource "nsxt_policy_segment" "tf_rtrl" {
-    count               = var.idx
-    display_name        = format("TF_RTR-L_%s", count.index)
+    display_name        = format("${var.prefix}RTR-L_${var.index}")
     transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
     security_profile {
         security_profile_path      = data.nsxt_policy_segment_security_profile.ssec_profile.path
@@ -59,8 +55,7 @@ resource "nsxt_policy_segment" "tf_rtrl" {
 }
 
 resource "nsxt_policy_segment" "tf_rtrr" {
-    count               = var.idx
-    display_name        = format("TF_RTR-R_%s", count.index)
+    display_name        = format("${var.prefix}RTR-R_${var.index}")
     transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
     security_profile {
         security_profile_path      = data.nsxt_policy_segment_security_profile.ssec_profile.path
@@ -68,4 +63,25 @@ resource "nsxt_policy_segment" "tf_rtrr" {
     discovery_profile {
         ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.ipd_profile.path
     }
+}
+
+########################################################################
+# Wait for NSX-T to provision networks in order to get them in vCenter #
+########################################################################
+
+resource "null_resource" "wait" {
+  triggers = {
+      rtrr     = nsxt_policy_segment.tf_rtrr.display_name,
+      rtrl     = nsxt_policy_segment.tf_rtrl.display_name,
+      isp_cli  = nsxt_policy_segment.tf_isp_cli.display_name,
+      isp_rtrl = nsxt_policy_segment.tf_isp_rtrl.display_name,
+      isp_rtrr = nsxt_policy_segment.tf_isp_rtrr.display_name
+  }
+  provisioner "local-exec" {
+    environment = {
+        networks = format("${nsxt_policy_segment.tf_isp_cli.display_name},${nsxt_policy_segment.tf_isp_rtrl.display_name},${nsxt_policy_segment.tf_isp_rtrr.display_name},${nsxt_policy_segment.tf_rtrl.display_name},${nsxt_policy_segment.tf_rtrr.display_name}")
+    }
+    command = "pwsh ./helpers/getnets.ps1"
+    when = create
+  }
 }
