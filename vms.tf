@@ -408,15 +408,15 @@ resource "vsphere_virtual_machine" "srv" {
     disk {
         label            = "disk1"
         unit_number      = 1
-        size             = "2"
+        size             = "5"
         eagerly_scrub    = data.vsphere_virtual_machine.winsrv_template.disks.0.eagerly_scrub
         thin_provisioned = data.vsphere_virtual_machine.winsrv_template.disks.0.thin_provisioned
     }
 
     disk {
-        label            = "disk3"
+        label            = "disk2"
         unit_number      = 2
-        size             = "2"
+        size             = "5"
         eagerly_scrub    = data.vsphere_virtual_machine.winsrv_template.disks.0.eagerly_scrub
         thin_provisioned = data.vsphere_virtual_machine.winsrv_template.disks.0.thin_provisioned
     }
