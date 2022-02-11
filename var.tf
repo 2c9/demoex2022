@@ -1,6 +1,6 @@
 variable "idx" {
   type = number
-  default = 5
+  default = 1
 }
 
 variable "prefix" {

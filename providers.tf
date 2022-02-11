@@ -15,7 +15,7 @@ variable "nsxt_password" {
 
 provider "nsxt" {
   host                  = "172.30.77.57"
-  username              = "admin"
+  username              = "dmitry@ouiit.local"
   password              = var.nsxt_password
   allow_unverified_ssl  = true
   max_retries           = 10
