@@ -1,6 +1,6 @@
 #!/bin/bash
 
-db_path='./students.json'
+db_path='./students2.json'
 
 if [ -f "$db_path" ]; then
     students=(`cat $db_path | jq -r '. | @sh' | tr -d "'"`)
@@ -27,7 +27,7 @@ fi
 
 if [[ "$1" == "-destroy" ]]; then
     echo "All of these will be destroyed:"
-    terraform workspace list | sed '/^$/d;/^[ \*\t]*default$/d'
+    terraform workspace list | sed '/^$/d;/^[ \*\t]*default$/d' | grep "${TF_VAR_prefix}"
     echo -e "\e[31mDESTROY EVERYTHING!!\e[0m"
     # Are you sure??
     read -p "Continue (yes/no)? " CONT
@@ -40,7 +40,7 @@ fi
 count=0
 for student in ${students[@]}; do
     
-    workspace="${student}_$count"
+    workspace="${TF_VAR_prefix}${student}_$count"
     terraform workspace select "${workspace}" 2>/dev/null
     workspace_exist=$?
 
