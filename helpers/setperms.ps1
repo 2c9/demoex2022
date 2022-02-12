@@ -1,24 +1,18 @@
 param (
     [string]$vcsa='vcsacluster.ouiit.local',
-    [string]$user='Administrator@vsphere.local',
-    [string]$regex='TF_*_',
-    [string]$role='DEMOEX2022',
-    [string]$userlist='students.json'
+    [string]$vcsa_user='Administrator@vsphere.local',
+    [string]$role='DEMOEX2022'
 )
 
-Connect-VIServer -Server $vcsa -User $user -Password $Env:TF_VAR_vsphere_password -Force | out-null
+Connect-VIServer -Server $vcsa -User $vcsa_user -Password $Env:TF_VAR_vsphere_password -Force | out-null
 
 $role = Get-VIRole -Name $role
 
-$students = ( Get-Content $userlist | ConvertFrom-Json )
-$count = 0
+$regex = "$($Env:TF_VAR_prefix).+_$($Env:TF_VAR_index)"
 
-foreach($student in $students){
-    $nets = Get-VirtualNetwork -Name $($regex+$count.ToString())
-    if ($nets.length -gt 0){
-        $nets | New-VIPermission -Principal "KP11\$($student)" -Role $role
-    }
-    $count+=1
+$nets = Get-VirtualNetwork -NetworkType "Distributed" | Where-Object { $_.Name -match $regex }
+if ($nets.length -gt 0){
+    $nets | New-VIPermission -Principal "KP11\$($Env:username)" -Role $role
 }
 
 Disconnect-VIServer -Server $vcsa -Confirm:$false
